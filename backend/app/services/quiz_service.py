@@ -155,7 +155,27 @@ async def check_quiz_answers(questions: List[Dict[str, Any]], answers: Dict[str,
                 correct_answer = question["correct_answer"]
                 
                 # Compare answers case-insensitively and ignoring extra whitespace
-                is_correct = user_answer.strip().lower() == correct_answer.strip().lower()
+                is_correct = False
+
+                # First try to handle numeric values correctly
+                user_answer_text = user_answer.strip()
+                correct_answer_text = correct_answer.strip()
+                
+                # Check if both answers are numeric
+                try:
+                    # If both are valid integers, compare them as numbers
+                    if user_answer_text.isdigit() and correct_answer_text.isdigit():
+                        is_correct = int(user_answer_text) == int(correct_answer_text)
+                    # If both are valid floats, compare them as numbers
+                    elif (user_answer_text.replace('.', '', 1).isdigit() and 
+                          correct_answer_text.replace('.', '', 1).isdigit()):
+                        is_correct = float(user_answer_text) == float(correct_answer_text)
+                    else:
+                        # Fall back to case-insensitive string comparison for non-numeric values
+                        is_correct = user_answer_text.lower() == correct_answer_text.lower()
+                except (ValueError, TypeError):
+                    # Fall back to case-insensitive string comparison if conversion fails
+                    is_correct = user_answer_text.lower() == correct_answer_text.lower()
                 
                 # Add to question results
                 question_results.append({

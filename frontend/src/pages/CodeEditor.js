@@ -253,392 +253,696 @@ const CodeEditor = () => {
         onClose={() => setShowAnalysisDialog(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: 'hidden',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+          }
+        }}
       >
         <DialogTitle sx={{ 
-          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+          background: 'linear-gradient(45deg, #673AB7 30%, #9C27B0 90%)',
           color: 'white',
-          fontWeight: 'bold'
+          fontWeight: 'bold',
+          p: 3,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 2
         }}>
-          Code Analysis Results
-        </DialogTitle>
-        <DialogContent sx={{ py: 3 }}>
-          <Box 
-            sx={{ 
-              whiteSpace: 'pre-wrap', 
-              fontFamily: 'inherit',
-              '& ul': { pl: 3 },
-              '& li': { mb: 1 },
-            }}
-            dangerouslySetInnerHTML={{ 
-              __html: analysisResult 
-                ? analysisResult.replace(/\n/g, '<br/>').replace(/• /g, '• ') 
-                : 'No analysis available'
-            }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button 
+          <span className="material-icons" style={{ fontSize: '1.8rem' }}>psychology</span>
+          <Typography variant="h5" sx={{ fontWeight: 700 }}>
+            Code Analysis Results
+          </Typography>
+          <IconButton
+            aria-label="close"
             onClick={() => setShowAnalysisDialog(false)}
-            variant="contained"
             sx={{
-              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-              color: 'white'
+              position: 'absolute',
+              right: 12,
+              top: 12,
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)'
+              }
             }}
           >
-            Close
-          </Button>
-        </DialogActions>
+            <span className="material-icons">close</span>
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0 }}>
+          {analyzing ? (
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              flexDirection: 'column',
+              p: 5,
+              minHeight: '300px',
+              gap: 3
+            }}>
+              <CircularProgress size={60} />
+              <Typography variant="h6">
+                Analyzing your code...
+              </Typography>
+            </Box>
+          ) : (
+            <Box>
+              {analysisResult && (
+                <Box>
+                  <Box sx={{
+                    p: 4,
+                    backgroundColor: analysisResult.includes('Great job') || 
+                                    analysisResult.includes('well done') || 
+                                    analysisResult.includes('correct') ? 
+                      'rgba(76, 175, 80, 0.1)' : 
+                      'rgba(255, 152, 0, 0.1)'
+                  }}>
+                    <Box 
+                      sx={{ 
+                        whiteSpace: 'pre-wrap', 
+                        fontFamily: 'inherit',
+                        '& ul': { pl: 3 },
+                        '& li': { mb: 1 },
+                        fontSize: '1rem',
+                        lineHeight: 1.7,
+                        color: '#333'
+                      }}
+                      dangerouslySetInnerHTML={{ 
+                        __html: String(analysisResult || "")
+                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                          .replace(/```([\s\S]*?)```/g, '<pre style="background-color: #f5f5f5; padding: 16px; border-radius: 4px; overflow-x: auto; margin: 16px 0; font-family: monospace;">$1</pre>')
+                          .replace(/`(.*?)`/g, '<code style="background-color: #f5f5f5; padding: 2px 4px; border-radius: 4px; font-family: monospace;">$1</code>')
+                          .replace(/\n/g, '<br />')
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ p: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                    <Button
+                      variant="contained"
+                      onClick={() => setShowAnalysisDialog(false)}
+                      sx={{
+                        py: 1,
+                        px: 4,
+                        borderRadius: 10,
+                        fontSize: '1rem',
+                        fontWeight: 600,
+                        background: analysisResult.includes('Great job') || 
+                                   analysisResult.includes('well done') || 
+                                   analysisResult.includes('correct') ?
+                          'linear-gradient(45deg, #4CAF50 30%, #43A047 90%)' :
+                          'linear-gradient(45deg, #FF8008, #FFC837)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        '&:hover': {
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 15px rgba(0, 0, 0, 0.2)'
+                        }
+                      }}
+                    >
+                      {analysisResult.includes('Great job') || 
+                       analysisResult.includes('well done') || 
+                       analysisResult.includes('correct') ?
+                        'Awesome!' : 'Got It'}
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
     );
   };
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        gap: 3,
+        background: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)'
+      }}>
+        <CircularProgress size={80} thickness={4} sx={{ color: 'white' }} />
+        <Typography variant="h4" sx={{
+          color: 'white',
+          fontWeight: 700,
+          textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+        }}>
+          Preparing your coding environment...
+        </Typography>
+        <Typography variant="h6" sx={{
+          color: 'white',
+          opacity: 0.9,
+          fontWeight: 400,
+          maxWidth: '600px',
+          textAlign: 'center'
+        }}>
+          Loading code scaffolding and editor components
+        </Typography>
       </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ 
-        mb: 4, 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-        color: 'white',
-        p: 3,
-        borderRadius: 2,
-        boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)'
-      }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 'bold',
-          textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
-        }}>
-          Code Editor
-        </Typography>
-        <Button 
-          variant="contained" 
-          onClick={handleBack}
-          sx={{ 
-            backgroundColor: 'rgba(255,255,255,0.9)',
-            color: '#2196F3',
-            '&:hover': {
-              backgroundColor: 'white',
-              transform: 'scale(1.05)',
-              transition: 'all 0.2s'
-            }
-          }}
-        >
-          Back to Home
-        </Button>
-      </Box>
-
-      <Paper sx={{ 
-        p: 3, 
-        mb: 3, 
-        borderRadius: 2, 
-        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        background: 'linear-gradient(to right, #ffffff, #f8f9fa)'
-      }}>
-        <Typography variant="h6" gutterBottom sx={{ 
-          color: '#2196F3', 
-          fontWeight: 'bold',
-          borderBottom: '2px solid #2196F3',
-          pb: 1
-        }}>
-          Task Description
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 2, color: '#2c3e50' }}>
-          {task || 'No task selected'}
-        </Typography>
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1c92d2 0%, #f2fcfe 100%)',
+      py: 4
+    }}>
+      <Container maxWidth="xl">
         <Box sx={{ 
+          mb: 4, 
           display: 'flex', 
-          gap: 2, 
-          alignItems: 'center',
-          backgroundColor: '#f8f9fa',
-          p: 2,
-          borderRadius: 1
+          flexDirection: { xs: 'column', md: 'row' },
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', md: 'center' },
+          gap: { xs: 3, md: 0 },
+          background: 'linear-gradient(45deg, #3a7bd5 0%, #00d2ff 100%)',
+          p: { xs: 3, md: 4 },
+          borderRadius: 3,
+          color: 'white',
+          boxShadow: '0 10px 30px rgba(0, 210, 255, 0.3)'
         }}>
-          <Typography variant="subtitle1" sx={{ color: '#2c3e50', fontWeight: 'bold' }}>
-            Difficulty:
-          </Typography>
-          <Typography 
-            variant="body1" 
+          <Box>
+            <Typography variant="h3" component="h1" sx={{ 
+              fontWeight: 800,
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+            }}>
+              Code Editor
+            </Typography>
+            <Typography variant="h6" sx={{ 
+              mt: 1,
+              fontWeight: 400,
+              opacity: 0.9,
+              maxWidth: '700px'
+            }}>
+              {difficulty === 'newbie' ? 'Newbie Mode: Complete the TODOs' : 'Expert Mode: Full Implementation'}
+            </Typography>
+          </Box>
+          <Button 
+            variant="contained" 
+            onClick={handleBack}
+            size="large"
             sx={{ 
-              backgroundColor: '#2196F3',
-              color: 'white',
-              px: 2,
-              py: 0.5,
-              borderRadius: 1,
-              fontWeight: 'bold',
-              boxShadow: '0 2px 4px rgba(33,150,243,0.3)'
-            }}
-          >
-            {difficulty || 'Not specified'}
-          </Typography>
-        </Box>
-      </Paper>
-
-      <Box sx={{ 
-        display: 'flex', 
-        gap: 2, 
-        mb: 3,
-        flexWrap: 'wrap',
-        alignItems: 'center'
-      }}>
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Language</InputLabel>
-          <Select
-            value={language}
-            label="Language"
-            onChange={(e) => {
-              setLocalCode('');
-              setCode('');
-              setLocalOutput('');
-              setOutput('');
-              useCodingStore.getState().setLanguage(e.target.value);
-            }}
-            sx={{ 
-              backgroundColor: 'white',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              color: '#3a7bd5',
+              px: 4,
+              py: 1.5,
+              borderRadius: 10,
+              fontWeight: 600,
+              boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
               '&:hover': {
-                boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                backgroundColor: 'white',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
+                transform: 'translateY(-2px)'
               }
             }}
           >
-            <MenuItem value="python">Python</MenuItem>
-            <MenuItem value="javascript">JavaScript</MenuItem>
-            <MenuItem value="java">Java</MenuItem>
-            <MenuItem value="cpp">C++</MenuItem>
-            <MenuItem value="csharp">C#</MenuItem>
-            <MenuItem value="go">Go</MenuItem>
-            <MenuItem value="rust">Rust</MenuItem>
-            <MenuItem value="php">PHP</MenuItem>
-            <MenuItem value="ruby">Ruby</MenuItem>
-            <MenuItem value="swift">Swift</MenuItem>
-          </Select>
-        </FormControl>
-        <Button 
-          variant="contained" 
-          onClick={handleRunCode} 
-          disabled={executing}
-          sx={{ 
-            px: 4,
-            background: 'linear-gradient(45deg, #4CAF50 30%, #45a049 90%)',
-            boxShadow: '0 3px 5px 2px rgba(76, 175, 80, .3)',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #45a049 30%, #4CAF50 90%)',
-              transform: 'scale(1.05)',
-              transition: 'all 0.2s'
-            },
-            '&:disabled': {
-              background: '#cccccc',
-              boxShadow: 'none'
-            }
-          }}
-        >
-          {executing ? 'Running...' : 'Run Code'}
-        </Button>
-        <Button 
-          variant="contained" 
-          onClick={handleAnalyzeCode} 
-          disabled={analyzing || !localCode}
-          sx={{ 
-            px: 4,
-            background: 'linear-gradient(45deg, #673AB7 30%, #9C27B0 90%)',
-            boxShadow: '0 3px 5px 2px rgba(103, 58, 183, .3)',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #5E35B1 30%, #8E24AA 90%)',
-              transform: 'scale(1.05)',
-              transition: 'all 0.2s'
-            },
-            '&:disabled': {
-              background: '#cccccc',
-              boxShadow: 'none'
-            }
-          }}
-        >
-          {analyzing ? 'Analyzing...' : 'Analyze Code'}
-        </Button>
-      </Box>
+            Back to Home
+          </Button>
+        </Box>
 
-      <Box sx={{ display: 'flex', gap: 3 }}>
-        <Box sx={{ flex: 1 }}>
-          <Paper sx={{ 
-            p: 2, 
-            mb: 3, 
-            borderRadius: 2, 
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            height: '500px',
-            overflow: 'hidden'
+        <Paper sx={{ 
+          p: { xs: 3, md: 4 }, 
+          mb: 4, 
+          borderRadius: 3, 
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <Typography variant="h5" gutterBottom sx={{ 
+            color: '#3a7bd5', 
+            fontWeight: 700,
+            borderBottom: '2px solid #3a7bd5',
+            pb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
           }}>
-            <Editor
-              height="100%"
-              defaultLanguage={language}
-              value={localCode}
-              onChange={handleEditorChange}
-              onMount={handleEditorDidMount}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                wordWrap: 'on',
-                automaticLayout: true,
-                scrollBeyondLastLine: false,
-                padding: { top: 16, bottom: 16 },
-                lineNumbers: 'on',
-                renderLineHighlight: 'all',
-                roundedSelection: true,
-                scrollbar: {
-                  vertical: 'visible',
-                  horizontal: 'visible',
-                  useShadows: true,
-                  verticalScrollbarSize: 10,
-                  horizontalScrollbarSize: 10
+            <span className="material-icons">assignment</span>
+            Task Description
+          </Typography>
+          <Typography variant="body1" sx={{ 
+            mb: 3, 
+            fontSize: '1.1rem',
+            color: '#2c3e50',
+            lineHeight: 1.7
+          }}>
+            {task || 'No task selected'}
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            alignItems: 'center',
+            backgroundColor: 'rgba(242, 245, 250, 0.8)',
+            p: 2,
+            borderRadius: 2,
+            border: '1px solid #e0e0e0'
+          }}>
+            <Typography variant="subtitle1" sx={{ 
+              color: '#2c3e50', 
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}>
+              <span className="material-icons">flag</span>
+              Difficulty:
+            </Typography>
+            <Box
+              sx={{ 
+                backgroundColor: difficulty === 'newbie' ? '#4caf50' : '#ff9800',
+                color: 'white',
+                px: 3,
+                py: 1,
+                borderRadius: 5,
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <span className="material-icons" style={{ fontSize: '1.2rem' }}>
+                {difficulty === 'newbie' ? 'emoji_objects' : 'psychology'}
+              </span>
+              {difficulty === 'newbie' ? 'Newbie' : 'Expert'}
+            </Box>
+          </Box>
+        </Paper>
+
+        <Box sx={{ 
+          display: 'flex', 
+          flexWrap: 'wrap',
+          gap: 2, 
+          mb: 4,
+          alignItems: 'center',
+          p: 3,
+          borderRadius: 3,
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.08)'
+        }}>
+          <FormControl sx={{ minWidth: 220 }}>
+            <InputLabel>Programming Language</InputLabel>
+            <Select
+              value={language}
+              label="Programming Language"
+              onChange={(e) => {
+                setLocalCode('');
+                setCode('');
+                setLocalOutput('');
+                setOutput('');
+                useCodingStore.getState().setLanguage(e.target.value);
+              }}
+              sx={{ 
+                backgroundColor: 'white',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                '&:hover': {
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
                 }
               }}
-            />
-          </Paper>
+            >
+              <MenuItem value="python">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>🐍</span>
+                  Python
+                </Box>
+              </MenuItem>
+              <MenuItem value="javascript">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>📜</span>
+                  JavaScript
+                </Box>
+              </MenuItem>
+              <MenuItem value="java">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>☕</span>
+                  Java
+                </Box>
+              </MenuItem>
+              <MenuItem value="cpp">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>⚙️</span>
+                  C++
+                </Box>
+              </MenuItem>
+              <MenuItem value="csharp">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>#️⃣</span>
+                  C#
+                </Box>
+              </MenuItem>
+              <MenuItem value="go">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>🔹</span>
+                  Go
+                </Box>
+              </MenuItem>
+              <MenuItem value="rust">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>🦀</span>
+                  Rust
+                </Box>
+              </MenuItem>
+              <MenuItem value="php">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>🐘</span>
+                  PHP
+                </Box>
+              </MenuItem>
+              <MenuItem value="ruby">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>💎</span>
+                  Ruby
+                </Box>
+              </MenuItem>
+              <MenuItem value="swift">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <span style={{ fontSize: '1.2rem' }}>🦅</span>
+                  Swift
+                </Box>
+              </MenuItem>
+            </Select>
+          </FormControl>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2,
+            flexWrap: 'wrap',
+            justifyContent: 'flex-end',
+            ml: 'auto' 
+          }}>
+            <Button 
+              variant="contained" 
+              onClick={handleRunCode} 
+              disabled={executing}
+              sx={{ 
+                px: 3,
+                py: 1.5,
+                borderRadius: 10,
+                fontWeight: 600,
+                fontSize: '1rem',
+                background: 'linear-gradient(45deg, #4CAF50 30%, #43A047 90%)',
+                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #4CAF50 30%, #43A047 90%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 15px rgba(76, 175, 80, 0.4)'
+                },
+                '&:disabled': {
+                  background: '#cccccc',
+                  boxShadow: 'none'
+                },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <span className="material-icons" style={{ fontSize: '1.3rem' }}>
+                {executing ? 'hourglass_top' : 'play_arrow'}
+              </span>
+              {executing ? 'Running...' : 'Run Code'}
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={handleAnalyzeCode} 
+              disabled={analyzing || !localCode}
+              sx={{ 
+                px: 3,
+                py: 1.5,
+                borderRadius: 10,
+                fontWeight: 600,
+                fontSize: '1rem',
+                background: 'linear-gradient(45deg, #673AB7 30%, #9C27B0 90%)',
+                boxShadow: '0 4px 12px rgba(103, 58, 183, 0.3)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #673AB7 30%, #9C27B0 90%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 15px rgba(103, 58, 183, 0.4)'
+                },
+                '&:disabled': {
+                  background: '#cccccc',
+                  boxShadow: 'none'
+                },
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}
+            >
+              <span className="material-icons" style={{ fontSize: '1.3rem' }}>
+                {analyzing ? 'hourglass_top' : 'psychology'}
+              </span>
+              {analyzing ? 'Analyzing...' : 'Analyze Code'}
+            </Button>
+          </Box>
+        </Box>
 
-          {output && (
+        <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', lg: 'row' } }}>
+          <Box sx={{ flex: 1 }}>
             <Paper sx={{ 
-              p: 3, 
-              borderRadius: 2, 
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(to right, #ffffff, #f8f9fa)'
+              p: 0, 
+              mb: 4, 
+              borderRadius: 3, 
+              overflow: 'hidden',
+              boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+              height: 'auto',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
-              <Typography variant="h6" gutterBottom sx={{ 
-                color: '#2196F3', 
-                fontWeight: 'bold',
-                borderBottom: '2px solid #2196F3',
-                pb: 1
+              <Box sx={{ 
+                p: 2, 
+                backgroundColor: '#252526', 
+                color: 'white',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center'
               }}>
-                Output
-              </Typography>
-              <Box 
-                component="pre" 
-                sx={{ 
-                  margin: 0, 
-                  whiteSpace: 'pre-wrap',
-                  backgroundColor: '#f8f9fa',
-                  p: 2,
-                  borderRadius: 1,
-                  fontFamily: 'monospace',
-                  fontSize: '0.9rem',
-                  border: '1px solid #e9ecef',
-                  color: '#2c3e50'
-                }}
-              >
-                {output}
+                <Typography sx={{ 
+                  fontSize: '1rem',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <span className="material-icons" style={{ fontSize: '1.2rem' }}>code</span>
+                  {language.charAt(0).toUpperCase() + language.slice(1)} Code Editor
+                </Typography>
+                <Typography sx={{ 
+                  fontSize: '0.8rem',
+                  opacity: 0.8,
+                  fontStyle: 'italic'
+                }}>
+                  Write your solution here
+                </Typography>
+              </Box>
+              <Box sx={{ height: '500px' }}>
+                <Editor
+                  height="100%"
+                  defaultLanguage={language}
+                  value={localCode}
+                  onChange={handleEditorChange}
+                  onMount={handleEditorDidMount}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                    scrollBeyondLastLine: false,
+                    padding: { top: 16, bottom: 16 },
+                    lineNumbers: 'on',
+                    renderLineHighlight: 'all',
+                    roundedSelection: true,
+                    scrollbar: {
+                      vertical: 'visible',
+                      horizontal: 'visible',
+                      useShadows: true,
+                      verticalScrollbarSize: 10,
+                      horizontalScrollbarSize: 10
+                    }
+                  }}
+                />
               </Box>
             </Paper>
-          )}
 
-          {error && (
-            <Paper sx={{ 
-              p: 3, 
-              mt: 3, 
-              borderRadius: 2, 
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(to right, #ffebee, #ffcdd2)',
-              border: '1px solid #ef9a9a'
-            }}>
-              <Typography color="error" component="div" sx={{ 
-                fontWeight: 'bold',
-                fontSize: '1.1rem'
+            {output && (
+              <Paper sx={{ 
+                p: 0, 
+                mb: 4, 
+                borderRadius: 3,
+                overflow: 'hidden',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+                background: 'white'
               }}>
-                Error
-              </Typography>
-              <Typography color="error" component="div" sx={{ 
-                mt: 1,
-                color: '#d32f2f'
+                <Box sx={{ 
+                  p: 2, 
+                  backgroundColor: '#333333', 
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <span className="material-icons">terminal</span>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Output
+                  </Typography>
+                </Box>
+                <Box 
+                  component="pre" 
+                  sx={{ 
+                    margin: 0, 
+                    whiteSpace: 'pre-wrap',
+                    backgroundColor: '#1e1e1e',
+                    p: 3,
+                    borderRadius: 0,
+                    fontFamily: '"Fira Code", "Courier New", monospace',
+                    fontSize: '0.9rem',
+                    color: '#00ff00',
+                    maxHeight: '300px',
+                    overflow: 'auto'
+                  }}
+                >
+                  {output}
+                </Box>
+              </Paper>
+            )}
+
+            {error && (
+              <Paper sx={{ 
+                p: 0, 
+                mb: 4, 
+                borderRadius: 3,
+                overflow: 'hidden',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+                background: 'white'
               }}>
-                {error}
-              </Typography>
-            </Paper>
+                <Box sx={{ 
+                  p: 2, 
+                  backgroundColor: '#d32f2f', 
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <span className="material-icons">error</span>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                    Error
+                  </Typography>
+                </Box>
+                <Box sx={{ 
+                  p: 3,
+                  backgroundColor: '#ffebee'
+                }}>
+                  <Typography sx={{ 
+                    color: '#d32f2f',
+                    whiteSpace: 'pre-wrap',
+                    fontFamily: '"Fira Code", "Courier New", monospace',
+                    fontSize: '0.9rem'
+                  }}>
+                    {error}
+                  </Typography>
+                </Box>
+              </Paper>
+            )}
+          </Box>
+
+          {difficulty === 'newbie' && hints.length > 0 && (
+            <Box sx={{ width: { xs: '100%', lg: '320px' } }}>
+              <Paper sx={{ 
+                p: 0, 
+                borderRadius: 3, 
+                overflow: 'hidden',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+                background: 'white',
+                position: 'sticky',
+                top: '20px'
+              }}>
+                <Box sx={{ 
+                  p: 2,
+                  backgroundColor: '#3f51b5',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <span className="material-icons">lightbulb</span>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Helpful Hints
+                  </Typography>
+                </Box>
+                <Box sx={{ p: 2 }}>
+                  {hints.map((hint) => (
+                    <Accordion 
+                      key={hint.id}
+                      expanded={expandedHint === hint.id}
+                      onChange={() => handleHintClick(hint.id)}
+                      sx={{
+                        mb: 2,
+                        '&:before': { display: 'none' },
+                        boxShadow: 'none',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px !important',
+                        overflow: 'hidden',
+                        transition: 'all 0.2s',
+                        '&:hover': {
+                          borderColor: '#3f51b5',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                        },
+                        '&.Mui-expanded': {
+                          margin: '0 0 16px 0',
+                          backgroundColor: '#f5f5f5'
+                        }
+                      }}
+                    >
+                      <AccordionSummary
+                        expandIcon={
+                          <span className="material-icons">expand_more</span>
+                        }
+                        sx={{
+                          minHeight: '48px',
+                          borderLeft: '4px solid #3f51b5',
+                          '&.Mui-expanded': {
+                            minHeight: '48px',
+                            backgroundColor: 'rgba(63, 81, 181, 0.08)'
+                          }
+                        }}
+                      >
+                        <Typography sx={{ 
+                          fontWeight: 600,
+                          color: '#3f51b5',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1
+                        }}>
+                          <span className="material-icons" style={{ fontSize: '1.1rem' }}>lightbulb</span>
+                          Hint {hint.id}
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails sx={{ p: 3, backgroundColor: 'white' }}>
+                        <Typography variant="body1" sx={{ 
+                          color: '#333',
+                          lineHeight: 1.6
+                        }}>
+                          {hint.content}
+                        </Typography>
+                      </AccordionDetails>
+                    </Accordion>
+                  ))}
+                </Box>
+              </Paper>
+            </Box>
           )}
         </Box>
 
-        {difficulty === 'newbie' && hints.length > 0 && (
-          <Box sx={{ width: '300px' }}>
-            <Paper sx={{ 
-              p: 2, 
-              borderRadius: 2, 
-              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-              height: '100%',
-              position: 'sticky',
-              top: '20px'
-            }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1,
-                mb: 2
-              }}>
-                <Box component="span" sx={{ color: '#2196F3' }}>
-                  <LightbulbIcon />
-                </Box>
-                <Typography variant="h6" sx={{ 
-                  color: '#2196F3',
-                  fontWeight: 'bold'
-                }}>
-                  Hints
-                </Typography>
-              </Box>
-              <Divider sx={{ mb: 2 }} />
-              {hints.map((hint) => (
-                <Accordion 
-                  key={hint.id}
-                  expanded={expandedHint === hint.id}
-                  onChange={() => handleHintClick(hint.id)}
-                  sx={{
-                    mb: 1,
-                    '&:before': { display: 'none' },
-                    boxShadow: 'none',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '4px !important',
-                    '&.Mui-expanded': {
-                      margin: '0 0 8px 0',
-                      backgroundColor: '#f5f5f5'
-                    }
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={
-                      <Box component="span">
-                        <ExpandMoreIcon />
-                      </Box>
-                    }
-                    sx={{
-                      minHeight: '48px',
-                      '&.Mui-expanded': {
-                        minHeight: '48px'
-                      }
-                    }}
-                  >
-                    <Typography sx={{ fontWeight: 500 }}>
-                      Hint {hint.id}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography variant="body2" color="text.secondary">
-                      {hint.content}
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Paper>
-          </Box>
-        )}
-      </Box>
-
-      {/* Analysis Dialog */}
-      <AnalysisDialog />
-    </Container>
+        {/* Analysis Dialog */}
+        <AnalysisDialog />
+      </Container>
+    </Box>
   );
 };
 

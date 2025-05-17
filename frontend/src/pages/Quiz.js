@@ -175,39 +175,88 @@ const Quiz = () => {
 
   if (showResults) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Paper sx={{ p: 4, borderRadius: 2 }}>
-          <Typography variant="h4" gutterBottom align="center" color="primary">
-            Quiz Results
-          </Typography>
-          
-          <Typography variant="h5" gutterBottom align="center" sx={{ mb: 4 }}>
-            Score: {score}/10 ({((score/10) * 100).toFixed(1)}%)
-          </Typography>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Paper sx={{ 
+          p: { xs: 3, md: 5 }, 
+          borderRadius: 3,
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.15)'
+        }}>
+          <Box sx={{
+            mb: 4,
+            textAlign: 'center',
+            background: 'linear-gradient(45deg, #3a7bd5 0%, #00d2ff 100%)',
+            p: 4,
+            borderRadius: 3,
+            color: 'white',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+          }}>
+            <Typography variant="h3" gutterBottom align="center" sx={{ 
+              fontWeight: 800,
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+            }}>
+              Quiz Results
+            </Typography>
+            
+            <Typography variant="h4" gutterBottom align="center" sx={{ mb: 3, fontWeight: 600 }}>
+              Score: {score}/10 ({((score/10) * 100).toFixed(1)}%)
+            </Typography>
+          </Box>
 
           {score === 10 ? (
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <Typography variant="h6" color="success.main" gutterBottom>
+            <Box sx={{ 
+              textAlign: 'center', 
+              mb: 5,
+              p: 4,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #E3FDF5 0%, #FFE6FA 100%)',
+              border: '1px solid rgba(0, 178, 0, 0.3)',
+              boxShadow: '0 5px 15px rgba(0, 178, 0, 0.1)'
+            }}>
+              <Typography variant="h4" color="success.main" gutterBottom sx={{ fontWeight: 700 }}>
                 Perfect Score! 🎉
               </Typography>
-              <Typography variant="body1" sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 4, color: '#00b200' }}>
                 You've demonstrated excellent understanding of the concepts.
               </Typography>
               <Button
                 variant="contained"
                 size="large"
                 onClick={handleContinue}
-                sx={{ mt: 2 }}
+                sx={{ 
+                  mt: 2,
+                  px: 5,
+                  py: 1.5,
+                  borderRadius: 10,
+                  background: 'linear-gradient(45deg, #00b09b, #96c93d)',
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  textTransform: 'none',
+                  boxShadow: '0 6px 15px rgba(0, 178, 0, 0.3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #00b09b, #96c93d)',
+                    boxShadow: '0 8px 20px rgba(0, 178, 0, 0.4)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
               >
                 Proceed to Coding
               </Button>
             </Box>
           ) : (
-            <Box sx={{ textAlign: 'center', mb: 4 }}>
-              <Typography variant="h6" color="warning.main" gutterBottom>
+            <Box sx={{ 
+              textAlign: 'center', 
+              mb: 5,
+              p: 4,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #FFF6B7 0%, #F9D29D 100%)',
+              border: '1px solid rgba(255, 152, 0, 0.3)',
+              boxShadow: '0 5px 15px rgba(255, 152, 0, 0.1)'
+            }}>
+              <Typography variant="h4" color="warning.main" gutterBottom sx={{ fontWeight: 700 }}>
                 Let's Learn More
               </Typography>
-              <Typography variant="body1" sx={{ mb: 4 }}>
+              <Typography variant="h6" sx={{ mb: 4, color: '#ff9800' }}>
                 You got {score} out of 10 questions correct. Let's improve your understanding!
               </Typography>
               <Button
@@ -215,9 +264,19 @@ const Quiz = () => {
                 size="large"
                 onClick={handleContinue}
                 sx={{
-                  backgroundColor: 'success.main',
+                  mt: 2,
+                  px: 5,
+                  py: 1.5,
+                  borderRadius: 10,
+                  background: 'linear-gradient(45deg, #FF8008, #FFC837)',
+                  fontWeight: 600,
+                  fontSize: '1.1rem',
+                  textTransform: 'none',
+                  boxShadow: '0 6px 15px rgba(255, 152, 0, 0.3)',
                   '&:hover': {
-                    backgroundColor: 'success.dark'
+                    background: 'linear-gradient(45deg, #FF8008, #FFC837)',
+                    boxShadow: '0 8px 20px rgba(255, 152, 0, 0.4)',
+                    transform: 'translateY(-2px)'
                   }
                 }}
               >
@@ -226,7 +285,14 @@ const Quiz = () => {
             </Box>
           )}
           
-          <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+          <Typography variant="h5" sx={{ 
+            mt: 6, 
+            mb: 4, 
+            fontWeight: 700,
+            background: 'linear-gradient(45deg, #3a7bd5, #6abbff)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>
             Question Review
           </Typography>
           
@@ -234,13 +300,28 @@ const Quiz = () => {
             <Paper 
               key={question.id} 
               sx={{ 
-                p: 3, 
+                p: 4, 
                 mb: 3, 
-                borderLeft: question.is_correct ? '4px solid #4caf50' : '4px solid #f44336',
-                backgroundColor: question.is_correct ? 'rgba(76, 175, 80, 0.05)' : 'rgba(244, 67, 54, 0.05)'
+                borderRadius: 3,
+                borderLeft: question.is_correct 
+                  ? '6px solid #4caf50' 
+                  : '6px solid #f44336',
+                backgroundColor: question.is_correct 
+                  ? 'rgba(76, 175, 80, 0.05)' 
+                  : 'rgba(244, 67, 54, 0.05)',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+                transition: 'transform 0.2s',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.12)'
+                }
               }}
             >
-              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              <Typography variant="h6" sx={{ 
+                fontWeight: 700, 
+                mb: 2,
+                color: question.is_correct ? '#2e7d32' : '#c62828'
+              }}>
                 Question {index + 1}: {question.question}
               </Typography>
               
@@ -248,25 +329,49 @@ const Quiz = () => {
                 <Box 
                   component="pre" 
                   sx={{ 
-                    p: 2, 
-                    backgroundColor: '#f5f5f5', 
-                    borderRadius: 1,
+                    p: 3, 
+                    backgroundColor: '#f8f9fa', 
+                    borderRadius: 2,
                     overflowX: 'auto',
-                    mb: 2,
-                    fontSize: '0.9rem'
+                    mb: 3,
+                    fontSize: '0.9rem',
+                    border: '1px solid #e3e3e3',
+                    boxShadow: 'inset 0 0 10px rgba(0,0,0,0.05)'
                   }}
                 >
                   {question.code_snippet}
                 </Box>
               )}
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
-                <Typography>
-                  <Box component="span" sx={{ fontWeight: 'bold' }}>Your answer:</Box> {question.user_answer || question.userAnswer}
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: 2, 
+                mt: 3,
+                p: 3,
+                borderRadius: 2,
+                backgroundColor: 'rgba(255,255,255,0.7)'
+              }}>
+                <Typography sx={{ fontSize: '1.05rem' }}>
+                  <Box component="span" sx={{ 
+                    fontWeight: 700, 
+                    color: question.is_correct ? 'text.primary' : '#d32f2f',
+                    mr: 1
+                  }}>
+                    Your answer:
+                  </Box>
+                  {String(question.user_answer || question.userAnswer || "")}
                 </Typography>
                 
-                <Typography color={question.is_correct ? 'success.main' : 'error.main'}>
-                  <Box component="span" sx={{ fontWeight: 'bold' }}>Correct answer:</Box> {question.correct_answer}
+                <Typography sx={{ fontSize: '1.05rem' }}>
+                  <Box component="span" sx={{ 
+                    fontWeight: 700, 
+                    color: question.is_correct ? '#2e7d32' : '#2e7d32',
+                    mr: 1
+                  }}>
+                    Correct answer:
+                  </Box>
+                  {String(question.correct_answer || "")}
                 </Typography>
               </Box>
             </Paper>
@@ -277,190 +382,244 @@ const Quiz = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Paper sx={{ 
-        p: 4, 
-        borderRadius: 2,
-        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-      }}>
-        <Box sx={{
-          mb: 4,
-          textAlign: 'center',
-          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-          p: 3,
-          borderRadius: 2,
-          color: 'white',
-          boxShadow: '0 4px 20px rgba(33, 203, 243, 0.3)'
+    <Box sx={{ 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #8EC5FC 0%, #E0C3FC 100%)',
+      py: 5
+    }}>
+      <Container maxWidth="lg">
+        <Paper sx={{ 
+          p: { xs: 3, md: 5 }, 
+          borderRadius: 3,
+          background: 'rgba(255, 255, 255, 0.9)',
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.15)'
         }}>
-          <Typography variant="h4" gutterBottom sx={{ 
-            fontWeight: 'bold',
-            textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
+          <Box sx={{
+            mb: 5,
+            textAlign: 'center',
+            background: 'linear-gradient(45deg, #764ba2 0%, #667eea 100%)',
+            p: 4,
+            borderRadius: 3,
+            color: 'white',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
           }}>
-            Expert Quiz
-          </Typography>
-          <Typography variant="subtitle1" sx={{ 
-            opacity: 0.9,
-            fontWeight: 500
-          }}>
-            Answer all questions to test your understanding
-          </Typography>
-        </Box>
-
-        {questions.map((question, index) => (
-          <Box key={question.id} sx={{ 
-            mb: 4,
-            p: 3,
-            borderRadius: 2,
-            backgroundColor: 'white',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-            transition: 'transform 0.2s',
-            '&:hover': {
-              transform: 'translateY(-2px)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }
-          }}>
-            <Typography variant="h6" gutterBottom sx={{ 
-              color: '#2196F3',
-              fontWeight: 'bold',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1
+            <Typography variant="h3" gutterBottom sx={{ 
+              fontWeight: 800,
+              textShadow: '2px 2px 4px rgba(0,0,0,0.2)'
             }}>
-              <Box component="span" sx={{ 
-                backgroundColor: '#2196F3',
-                color: 'white',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                fontSize: '0.9rem'
-              }}>
-                {index + 1}
-              </Box>
-              {question.question}
+              Expert Quiz
             </Typography>
+            <Typography variant="h6" sx={{ 
+              opacity: 0.9,
+              fontWeight: 400,
+              maxWidth: '700px',
+              mx: 'auto'
+            }}>
+              Answer all questions to test your understanding of the concepts
+            </Typography>
+          </Box>
 
-            {question.code_snippet && (
-              <Paper 
-                sx={{ 
-                  p: 2, 
-                  backgroundColor: '#f8f9fa',
-                  fontFamily: 'monospace',
-                  mb: 2,
-                  borderRadius: 1,
-                  border: '1px solid #e9ecef'
-                }}
-              >
-                <Box component="pre" sx={{ 
-                  margin: 0, 
-                  whiteSpace: 'pre-wrap',
-                  color: '#2c3e50'
-                }}>
-                  {question.code_snippet}
+          {questions.map((question, index) => (
+            <Paper 
+              key={question.id} 
+              elevation={4}
+              sx={{ 
+                mb: 4,
+                p: 4,
+                borderRadius: 3,
+                backgroundColor: 'white',
+                boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.12)'
+                }
+              }}
+            >
+              <Typography variant="h5" gutterBottom sx={{ 
+                color: '#512da8',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2,
+                mb: 3
+              }}>
+                <Box 
+                  component="span" 
+                  sx={{ 
+                    backgroundColor: '#512da8',
+                    color: 'white',
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: '1.2rem',
+                    boxShadow: '0 3px 5px rgba(0,0,0,0.2)'
+                  }}
+                >
+                  {index + 1}
                 </Box>
-              </Paper>
-            )}
+                {question.question}
+              </Typography>
 
-            <FormControl component="fieldset" sx={{ width: '100%' }}>
-              <RadioGroup
-                value={answers[question.id] || ''}
-                onChange={(e) => handleAnswer(question.id, e.target.value)}
-              >
-                {question.options.map((option, optIndex) => (
-                  <FormControlLabel
-                    key={optIndex}
-                    value={option}
-                    control={
-                      <Radio 
+              {question.code_snippet && (
+                <Box 
+                  sx={{ 
+                    p: 0, 
+                    mb: 3,
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    border: '1px solid #e0e0e0',
+                    boxShadow: '0 3px 8px rgba(0,0,0,0.08)'
+                  }}
+                >
+                  <Box sx={{ 
+                    p: 1.5, 
+                    backgroundColor: '#2d2d2d',
+                    color: 'white',
+                    fontWeight: 500,
+                    fontSize: '0.9rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}>
+                    <span className="material-icons" style={{ fontSize: '1.1rem' }}>code</span>
+                    Code Example
+                  </Box>
+                  <Box 
+                    component="pre" 
+                    sx={{ 
+                      m: 0, 
+                      p: 3,
+                      backgroundColor: '#f8f9fa',
+                      whiteSpace: 'pre-wrap',
+                      color: '#2c3e50',
+                      overflowX: 'auto',
+                      fontFamily: '"Fira Code", "Courier New", monospace',
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    {question.code_snippet}
+                  </Box>
+                </Box>
+              )}
+
+              <FormControl component="fieldset" sx={{ width: '100%' }}>
+                <RadioGroup
+                  value={answers[question.id] || ''}
+                  onChange={(e) => handleAnswer(question.id, e.target.value)}
+                >
+                  <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' } }}>
+                    {question.options.map((option, optIndex) => (
+                      <FormControlLabel
+                        key={optIndex}
+                        value={option}
+                        control={
+                          <Radio 
+                            sx={{
+                              color: '#512da8',
+                              '&.Mui-checked': {
+                                color: '#512da8',
+                              },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography sx={{ 
+                            color: '#2c3e50',
+                            fontWeight: answers[question.id] === option ? 600 : 400
+                          }}>
+                            {option}
+                          </Typography>
+                        }
                         sx={{
-                          color: '#2196F3',
-                          '&.Mui-checked': {
-                            color: '#2196F3',
+                          m: 0,
+                          p: 2,
+                          borderRadius: 2,
+                          transition: 'all 0.2s',
+                          border: '1px solid',
+                          borderColor: answers[question.id] === option ? '#512da8' : '#e0e0e0',
+                          '&:hover': {
+                            backgroundColor: 'rgba(81, 45, 168, 0.04)',
+                            borderColor: '#512da8'
                           },
+                          ...(answers[question.id] === option && {
+                            backgroundColor: 'rgba(81, 45, 168, 0.1)',
+                            '&:hover': {
+                              backgroundColor: 'rgba(81, 45, 168, 0.15)'
+                            }
+                          })
                         }}
                       />
-                    }
-                    label={
-                      <Typography sx={{ 
-                        color: '#2c3e50',
-                        fontWeight: answers[question.id] === option ? 600 : 400
-                      }}>
-                        {option}
-                      </Typography>
-                    }
-                    sx={{
-                      m: 1,
-                      p: 1,
-                      borderRadius: 1,
-                      transition: 'all 0.2s',
-                      '&:hover': {
-                        backgroundColor: '#f8f9fa'
-                      },
-                      ...(answers[question.id] === option && {
-                        backgroundColor: '#e3f2fd',
-                        '&:hover': {
-                          backgroundColor: '#e3f2fd'
-                        }
-                      })
-                    }}
-                  />
-                ))}
-              </RadioGroup>
-            </FormControl>
+                    ))}
+                  </Box>
+                </RadioGroup>
+              </FormControl>
+            </Paper>
+          ))}
 
-            {index < questions.length - 1 && (
-              <Divider sx={{ 
-                my: 3,
-                borderColor: 'rgba(0,0,0,0.1)'
-              }} />
-            )}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            mt: 5,
+            gap: 2,
+            flexWrap: 'wrap'
+          }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/')}
+              size="large"
+              sx={{
+                py: 1.5,
+                px: 4,
+                borderRadius: 10,
+                borderWidth: 2,
+                borderColor: '#512da8',
+                color: '#512da8',
+                fontWeight: 600,
+                '&:hover': {
+                  borderWidth: 2,
+                  borderColor: '#512da8',
+                  backgroundColor: 'rgba(81, 45, 168, 0.04)',
+                  transform: 'translateY(-2px)'
+                }
+              }}
+            >
+              Back to Home
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={Object.keys(answers).length !== questions.length}
+              size="large"
+              sx={{
+                py: 1.5,
+                px: 5,
+                borderRadius: 10,
+                background: 'linear-gradient(45deg, #764ba2 0%, #667eea 100%)',
+                fontWeight: 600,
+                boxShadow: '0 5px 15px rgba(102, 126, 234, 0.4)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #764ba2 10%, #667eea 90%)',
+                  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.6)',
+                  transform: 'translateY(-2px)'
+                },
+                '&:disabled': {
+                  background: '#cccccc',
+                  boxShadow: 'none'
+                }
+              }}
+            >
+              Submit Quiz
+            </Button>
           </Box>
-        ))}
-
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          mt: 4,
-          gap: 2
-        }}>
-          <Button
-            variant="outlined"
-            onClick={() => navigate('/')}
-            sx={{
-              borderColor: '#2196F3',
-              color: '#2196F3',
-              '&:hover': {
-                borderColor: '#1976D2',
-                backgroundColor: 'rgba(33, 150, 243, 0.04)',
-                transform: 'scale(1.02)',
-                transition: 'all 0.2s'
-              }
-            }}
-          >
-            Back to Home
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={Object.keys(answers).length !== questions.length}
-            sx={{
-              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-              boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
-              '&:hover': {
-                background: 'linear-gradient(45deg, #1976D2 30%, #2196F3 90%)',
-                transform: 'scale(1.05)',
-                transition: 'all 0.2s'
-              },
-              '&:disabled': {
-                background: '#cccccc',
-                boxShadow: 'none'
-              }
-            }}
-          >
-            Submit Quiz
-          </Button>
-        </Box>
-      </Paper>
-    </Container>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 
