@@ -76,7 +76,52 @@ async def generate_code_scaffolding(task_description: str, difficulty_level: str
             raise Exception("Failed to initialize Gemini API. Please check your API key.")
 
     try:
-        if use_boilerplate:
+        # If it's newbie mode, we want to use the newbie prompt regardless of use_boilerplate
+        if difficulty_level == "newbie":
+            # Incorporate concept keywords if provided
+            concept_parts = ""
+            if concept_keywords:
+                concept_parts = f"""
+                Important: Make sure the user needs to implement the following concepts:
+                {', '.join(concept_keywords)}
+                
+                For each of these concepts, leave those parts of the code empty with clear TODO comments.
+                """
+            
+            prompt = f"""Generate code scaffolding for a newbie programmer learning to implement the following task in {language}:
+            Task: {task_description}
+            
+            Requirements for the NEWBIE level:
+            1. Create a PARTIAL implementation where:
+                - Structure the code with main function and helper functions
+                - Implement about 50-70% of the basic functions or parts of code
+                - Leave the remaining 30-50% of functions EMPTY with ONLY function signatures and TODOs
+                - Use simple docstrings explaining what each function should do
+                - Include clear TODO comments for parts the user needs to implement
+            
+            2. The code should be structured so that:
+                - The main program flow and structure are clear and FULLY implemented
+                - Some helper functions are FULLY implemented to guide the user
+                - Key functions that teach important concepts are left for the user to implement
+                - TODO comments explain what the user needs to implement and HOW to approach it
+            
+            3. For example, in a sorting algorithm task:
+                - FULLY implement the main function that calls the sort
+                - Leave the actual sorting algorithm function empty with TODO comments
+                - FULLY implement helper functions like printing or data generation
+            
+            {concept_parts}
+            
+            4. Include 5 helpful hints for implementation
+            
+            Return the code in the following JSON format:
+            {{
+                "scaffolding": "The partially implemented code",
+                "hints": ["Hint 1", "Hint 2", "Hint 3", "Hint 4", "Hint 5"]
+            }}
+            
+            Important: Return ONLY the JSON object, no other text, markdown formatting, or backticks."""
+        elif use_boilerplate:
             # If we have concept keywords, we'll skip those parts in the code
             skip_parts = ""
             if concept_keywords:
@@ -113,38 +158,6 @@ async def generate_code_scaffolding(task_description: str, difficulty_level: str
             - Keep the code structure very simple and beginner-friendly
             - NO classes or complex structures
             - Just basic functions and main entry point"""
-        elif difficulty_level == "newbie":
-            prompt = f"""Generate code scaffolding for a newbie programmer learning to implement the following task in {language}:
-            Task: {task_description}
-            
-            Requirements for the NEWBIE level:
-            1. Create a PARTIAL implementation where:
-                - Structure the code with main function and helper functions
-                - Implement SOME basic functions or parts of code
-                - Leave OTHER functions EMPTY with ONLY function signatures and TODOs
-                - Use simple docstrings explaining what each function should do
-                - Include clear TODO comments for parts the user needs to implement
-            
-            2. The code should be structured so that:
-                - The main program flow and structure are clear
-                - Some helper functions are implemented to guide the user
-                - Key functions that teach important concepts are left for the user to implement
-                - TODO comments explain what the user needs to implement
-            
-            3. For example, in a sorting algorithm task:
-                - Implement the main function that calls the sort
-                - Leave the actual sorting algorithm function empty with TODO comments
-                - Implement helper functions like printing or data generation
-            
-            4. Include 5 helpful hints for implementation
-            
-            Return the code in the following JSON format:
-            {{
-                "scaffolding": "The partially implemented code",
-                "hints": ["Hint 1", "Hint 2", "Hint 3", "Hint 4", "Hint 5"]
-            }}
-            
-            Important: Return ONLY the JSON object, no other text, markdown formatting, or backticks."""
         else:
             prompt = f"""Generate code scaffolding for the following programming task in {language}:
             Task: {task_description}
@@ -221,7 +234,7 @@ async def generate_code_scaffolding(task_description: str, difficulty_level: str
         code = code.strip()
         
         # Handle hints based on difficulty level
-        if difficulty_level == "newbie" and not use_boilerplate:
+        if difficulty_level == "newbie":
             if "hints" not in result or not isinstance(result["hints"], list):
                 result["hints"] = []
             
