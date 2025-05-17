@@ -121,7 +121,9 @@ const Learning = () => {
       state: {
         perfectScore: false,
         fromLearning: true,
-        concept_keywords: learningData.conceptKeywords
+        concept_keywords: learningData.conceptKeywords,
+        taskDescription: taskDescription,
+        language: language
       }
     });
   };

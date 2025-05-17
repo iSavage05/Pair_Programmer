@@ -4,6 +4,7 @@ from app.services.ai_service import generate_code_scaffolding
 from app.services.code_executor import execute_code
 from app.services.quiz_service import generate_quiz, check_quiz_answers
 from app.services.learning_service import generate_learning_content
+from app.services.code_service import analyze_code
 import logging
 import uuid
 from typing import Dict, Any, List
@@ -107,6 +108,67 @@ async def run_code(request: dict):
         raise
     except Exception as e:
         logger.error(f"Error running code: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/analyze_code")
+async def analyze_code_endpoint(request: dict):
+    try:
+        if not request.get("code"):
+            raise HTTPException(status_code=400, detail="Code is required")
+        
+        if not request.get("language"):
+            raise HTTPException(status_code=400, detail="Programming language is required")
+            
+        if not request.get("task_description"):
+            raise HTTPException(status_code=400, detail="Task description is required")
+        
+        try:
+            language = ProgrammingLanguage(request["language"])
+        except ValueError:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid programming language. Must be one of: {', '.join([lang.value for lang in ProgrammingLanguage])}"
+            )
+        
+        logger.info(f"Analyzing code in {language.value}")
+        
+        # First execute the code to determine if it's working
+        has_execution_errors = False
+        try:
+            output = await execute_code(request["code"], language)
+            # Check for common error patterns in the output
+            execution_error_patterns = [
+                "error", "exception", "traceback", "syntax error", "runtime error",
+                "indexerror", "keyerror", "attributeerror", "typeerror", "nameerror",
+                "valueerror", "syntaxerror", "indentationerror", "fail"
+            ]
+            
+            has_execution_errors = any(pattern in output.lower() for pattern in execution_error_patterns)
+            
+            logger.info(f"Code execution result - Has errors: {has_execution_errors}")
+            if has_execution_errors:
+                logger.info(f"Execution errors detected in output: {output[:200]}...")
+                
+        except Exception as e:
+            has_execution_errors = True
+            output = str(e)
+            logger.info(f"Exception during code execution: {str(e)}")
+        
+        # Get a logical code correctness analysis from the AI service
+        # We use this approach because execution success doesn't always mean the code is correct
+        # for the specific task
+        analysis_result = await analyze_code(
+            request["code"], 
+            request["task_description"], 
+            language.value, 
+            has_errors=has_execution_errors
+        )
+        
+        return {"analysis": analysis_result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error analyzing code: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/generate_quiz")

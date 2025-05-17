@@ -113,19 +113,43 @@ async def generate_code_scaffolding(task_description: str, difficulty_level: str
             - Keep the code structure very simple and beginner-friendly
             - NO classes or complex structures
             - Just basic functions and main entry point"""
+        elif difficulty_level == "newbie":
+            prompt = f"""Generate code scaffolding for a newbie programmer learning to implement the following task in {language}:
+            Task: {task_description}
+            
+            Requirements for the NEWBIE level:
+            1. Create a PARTIAL implementation where:
+                - Structure the code with main function and helper functions
+                - Implement SOME basic functions or parts of code
+                - Leave OTHER functions EMPTY with ONLY function signatures and TODOs
+                - Use simple docstrings explaining what each function should do
+                - Include clear TODO comments for parts the user needs to implement
+            
+            2. The code should be structured so that:
+                - The main program flow and structure are clear
+                - Some helper functions are implemented to guide the user
+                - Key functions that teach important concepts are left for the user to implement
+                - TODO comments explain what the user needs to implement
+            
+            3. For example, in a sorting algorithm task:
+                - Implement the main function that calls the sort
+                - Leave the actual sorting algorithm function empty with TODO comments
+                - Implement helper functions like printing or data generation
+            
+            4. Include 5 helpful hints for implementation
+            
+            Return the code in the following JSON format:
+            {{
+                "scaffolding": "The partially implemented code",
+                "hints": ["Hint 1", "Hint 2", "Hint 3", "Hint 4", "Hint 5"]
+            }}
+            
+            Important: Return ONLY the JSON object, no other text, markdown formatting, or backticks."""
         else:
             prompt = f"""Generate code scaffolding for the following programming task in {language}:
             Task: {task_description}
             
-            Requirements:
-            1. For newbie level:
-               - Provide only basic boilerplate code
-               - Use simple functions (NO classes)
-               - Include basic docstrings
-               - DO NOT include implementation details
-               - Include 5 helpful hints for implementation
-            
-            2. For expert level:
+            Requirements for EXPERT level:
                - Provide complete implementation
                - Include all necessary logic
                - Include detailed comments
@@ -136,7 +160,7 @@ async def generate_code_scaffolding(task_description: str, difficulty_level: str
             Return the code in the following JSON format:
             {{
                 "scaffolding": "The code",
-                "hints": ["Hint 1", "Hint 2", ...]  # Only include hints for newbie level
+                "hints": []  # No hints for expert level
             }}
             
             Important: Return ONLY the JSON object, no other text, markdown formatting, or backticks."""

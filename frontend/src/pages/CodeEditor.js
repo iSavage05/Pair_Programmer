@@ -17,7 +17,11 @@ import {
   AccordionSummary,
   AccordionDetails,
   IconButton,
-  Tooltip
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
@@ -30,7 +34,7 @@ const CodeEditor = () => {
   const location = useLocation();
   const theme = useTheme();
   const editorRef = useRef(null);
-  const { taskDescription: task, difficultyLevel: difficulty, language, currentCode: code, setCurrentCode: setCode, setOutput, resetState } = useCodingStore();
+  const { taskDescription: storeTask, difficultyLevel: difficulty, language: storeLanguage, currentCode: code, setCurrentCode: setCode, setOutput, resetState } = useCodingStore();
   const [localCode, setLocalCode] = useState('');
   const [output, setLocalOutput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -38,11 +42,18 @@ const CodeEditor = () => {
   const [executing, setExecuting] = useState(false);
   const [hints, setHints] = useState([]);
   const [expandedHint, setExpandedHint] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [showAnalysisDialog, setShowAnalysisDialog] = useState(false);
 
   // Get the scenario from location state
   const isPerfectScore = location.state?.perfectScore || false;
   const isFromLearning = location.state?.fromLearning || false;
   const useBoilerplate = location.state?.use_boilerplate || false;
+  
+  // Get task description and language from location state if available
+  const task = location.state?.taskDescription || storeTask;
+  const language = location.state?.language || storeLanguage;
 
   // Handle editor mounting
   const handleEditorDidMount = (editor, monaco) => {
@@ -185,6 +196,43 @@ const CodeEditor = () => {
     }
   };
 
+  const handleAnalyzeCode = async () => {
+    try {
+      setAnalyzing(true);
+      setError(null);
+      
+      // Ensure code is a string before sending
+      const codeToAnalyze = typeof localCode === 'string' ? localCode : String(localCode);
+      
+      const response = await axios.post('http://localhost:8000/api/analyze_code', {
+        code: codeToAnalyze,
+        language: language,
+        task_description: task
+      });
+      
+      if (response.data && response.data.analysis) {
+        // Store analysis result, ensuring it's a string
+        const result = response.data.analysis;
+        const sanitizedResult = typeof result === 'string' 
+          ? result 
+          : typeof result === 'object' 
+            ? JSON.stringify(result) 
+            : String(result);
+            
+        setAnalysisResult(sanitizedResult);
+        setShowAnalysisDialog(true);
+      } else {
+        throw new Error('Invalid response format from server');
+      }
+    } catch (err) {
+      console.error('Error analyzing code:', err);
+      const errorMessage = err.response?.data?.detail || err.message || 'Failed to analyze code';
+      setError(errorMessage);
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const handleBack = () => {
     resetState();
     navigate('/');
@@ -195,6 +243,53 @@ const CodeEditor = () => {
       setLocalCode(value);
       setCode(value);
     }
+  };
+
+  // Add dialog to display analysis results
+  const AnalysisDialog = () => {
+    return (
+      <Dialog
+        open={showAnalysisDialog}
+        onClose={() => setShowAnalysisDialog(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+          color: 'white',
+          fontWeight: 'bold'
+        }}>
+          Code Analysis Results
+        </DialogTitle>
+        <DialogContent sx={{ py: 3 }}>
+          <Box 
+            sx={{ 
+              whiteSpace: 'pre-wrap', 
+              fontFamily: 'inherit',
+              '& ul': { pl: 3 },
+              '& li': { mb: 1 },
+            }}
+            dangerouslySetInnerHTML={{ 
+              __html: analysisResult 
+                ? analysisResult.replace(/\n/g, '<br/>').replace(/• /g, '• ') 
+                : 'No analysis available'
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setShowAnalysisDialog(false)}
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+              color: 'white'
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
   };
 
   if (loading) {
@@ -346,6 +441,27 @@ const CodeEditor = () => {
           }}
         >
           {executing ? 'Running...' : 'Run Code'}
+        </Button>
+        <Button 
+          variant="contained" 
+          onClick={handleAnalyzeCode} 
+          disabled={analyzing || !localCode}
+          sx={{ 
+            px: 4,
+            background: 'linear-gradient(45deg, #673AB7 30%, #9C27B0 90%)',
+            boxShadow: '0 3px 5px 2px rgba(103, 58, 183, .3)',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #5E35B1 30%, #8E24AA 90%)',
+              transform: 'scale(1.05)',
+              transition: 'all 0.2s'
+            },
+            '&:disabled': {
+              background: '#cccccc',
+              boxShadow: 'none'
+            }
+          }}
+        >
+          {analyzing ? 'Analyzing...' : 'Analyze Code'}
         </Button>
       </Box>
 
@@ -519,6 +635,9 @@ const CodeEditor = () => {
           </Box>
         )}
       </Box>
+
+      {/* Analysis Dialog */}
+      <AnalysisDialog />
     </Container>
   );
 };
