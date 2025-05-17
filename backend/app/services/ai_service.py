@@ -91,33 +91,76 @@ async def generate_code_scaffolding(task_description: str, difficulty_level: str
             prompt = f"""Generate code scaffolding for a newbie programmer learning to implement the following task in {language}:
             Task: {task_description}
             
+            CRITICAL REQUIREMENT: You MUST leave 30-50% of the functions COMPLETELY EMPTY with ONLY function signatures, docstrings, and TODO comments.
+            
             Requirements for the NEWBIE level:
             1. Create a PARTIAL implementation where:
-                - Structure the code with main function and helper functions
-                - Implement about 50-70% of the basic functions or parts of code
-                - Leave the remaining 30-50% of functions EMPTY with ONLY function signatures and TODOs
-                - Use simple docstrings explaining what each function should do
-                - Include clear TODO comments for parts the user needs to implement
+                - Implement ONLY 50-70% of the functions or code parts completely
+                - Leave AT LEAST 30% of the functions COMPLETELY EMPTY (with ONLY signatures, docstrings, and TODOs)
+                - DO NOT provide ANY implementation inside empty functions - just function signature, docstring and TODOs
+                - For empty functions, ONLY include detailed TODO comments explaining what needs to be done
             
-            2. The code should be structured so that:
-                - The main program flow and structure are clear and FULLY implemented
-                - Some helper functions are FULLY implemented to guide the user
-                - Key functions that teach important concepts are left for the user to implement
-                - TODO comments explain what the user needs to implement and HOW to approach it
+            2. Select which functions to leave empty:
+                - EMPTY: Functions that teach core programming concepts (loops, conditionals, data structures)
+                - EMPTY: Functions that implement the primary algorithm or logic of the task
+                - IMPLEMENTED: Helper functions, utility functions, and display/output functions
+                - IMPLEMENTED: Main program flow and structure should be clear
             
-            3. For example, in a sorting algorithm task:
-                - FULLY implement the main function that calls the sort
-                - Leave the actual sorting algorithm function empty with TODO comments
-                - FULLY implement helper functions like printing or data generation
+            3. For empty functions, include:
+                - ONLY the function signature with parameters
+                - A detailed docstring explaining parameters and return values
+                - TODO comments explaining step-by-step how to approach the problem
+                - NO actual code implementation at all - let the student write ALL the code
+            
+            4. Example of a properly empty function:
+            ```
+            def find_max_value(numbers):
+                \"\"\"Find the maximum value in a list of numbers.
+                
+                Args:
+                    numbers: List of integers
+                    
+                Returns:
+                    The maximum value in the list
+                \"\"\"
+                # TODO: Implement the function to find the maximum value in the list
+                # TODO: 1. Initialize a variable to track the maximum
+                # TODO: 2. Loop through each number in the list
+                # TODO: 3. If current number is larger than max, update max
+                # TODO: 4. Return the maximum value after checking all numbers
+                # TODO: Hint: Consider edge cases like empty lists
+            ```
+            
+            CRITICAL WARNING: DO NOT DO THIS:
+            ```
+            def get_computer_move(board):
+                \"\"\"Gets a valid move from the computer.\"\"\"
+                # TODO: Implement the computer's move logic here.
+                # The computer should choose a random available spot.
+                
+                # WRONG - Don't provide implementation like this:
+                available_moves = [i + 1 for i, spot in enumerate(board) if spot == ' ']
+                if not available_moves:
+                    return None
+                return random.choice(available_moves)
+            ```
+            
+            For empty functions, provide ONLY the function signature, docstring, and TODO comments. DO NOT include ANY implementation code at all, not even as examples or placeholders.
             
             {concept_parts}
             
-            4. Include 5 helpful hints for implementation
+            5. Functions that MUST be left empty (pick 2-4 based on task complexity):
+                - Core algorithm functions
+                - Functions implementing main game logic
+                - Functions handling data processing
+                - Functions implementing key concepts
+            
+            6. Include 5 specific hints related ONLY to the empty functions you left for the user to implement
             
             Return the code in the following JSON format:
             {{
-                "scaffolding": "The partially implemented code",
-                "hints": ["Hint 1", "Hint 2", "Hint 3", "Hint 4", "Hint 5"]
+                "scaffolding": "The partially implemented code with empty functions",
+                "hints": ["Hint 1 for empty function", "Hint 2 for empty function", "Hint 3 for empty function", "Hint 4 for empty function", "Hint 5 for empty function"]
             }}
             
             Important: Return ONLY the JSON object, no other text, markdown formatting, or backticks."""

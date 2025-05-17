@@ -639,37 +639,6 @@ const CodeEditor = () => {
           }}>
             <Button 
               variant="contained" 
-              onClick={handleRunCode} 
-              disabled={executing}
-              sx={{ 
-                px: 3,
-                py: 1.5,
-                borderRadius: 10,
-                fontWeight: 600,
-                fontSize: '1rem',
-                background: 'linear-gradient(45deg, #4CAF50 30%, #43A047 90%)',
-                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                '&:hover': {
-                  background: 'linear-gradient(45deg, #4CAF50 30%, #43A047 90%)',
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 15px rgba(76, 175, 80, 0.4)'
-                },
-                '&:disabled': {
-                  background: '#cccccc',
-                  boxShadow: 'none'
-                },
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              <span className="material-icons" style={{ fontSize: '1.3rem' }}>
-                {executing ? 'hourglass_top' : 'play_arrow'}
-              </span>
-              {executing ? 'Running...' : 'Run Code'}
-            </Button>
-            <Button 
-              variant="contained" 
               onClick={handleAnalyzeCode} 
               disabled={analyzing || !localCode}
               sx={{ 
