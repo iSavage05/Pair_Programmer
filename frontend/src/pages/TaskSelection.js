@@ -73,7 +73,7 @@ const TaskSelection = () => {
           Enter your coding task and preferences to get started
         </Typography>
 
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
             label="Task Description"

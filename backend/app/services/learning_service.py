@@ -37,7 +37,7 @@ except Exception as e:
 
 async def generate_learning_content(task_description: str, language: str, wrong_answers: List[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
-    Generate learning content for the task, focusing on concepts that were answered incorrectly.
+    Generate learning content based on the task description and wrong answers.
     """
     if not model:
         try:
@@ -46,8 +46,13 @@ async def generate_learning_content(task_description: str, language: str, wrong_
             raise Exception("Failed to initialize Gemini API. Please check your API key.")
 
     try:
-        # Generate explanations for wrong answers if provided
+        logger.info(f"Generating learning content for task: {task_description}")
+        logger.info(f"Number of wrong answers: {len(wrong_answers) if wrong_answers else 0}")
+        
+        # Generate explanations for wrong answers
         wrong_answer_explanations = []
+        concept_keywords_set = set()
+        
         if wrong_answers:
             for wrong in wrong_answers:
                 explanation_prompt = f"""For the following programming question in {language}:
@@ -72,32 +77,62 @@ async def generate_learning_content(task_description: str, language: str, wrong_
                     "visual_explanation": {{
                         "type": "flowchart|diagram|steps|memory|none",
                         "content": "ASCII art or text-based visualization if needed"
-                    }}
+                    }},
+                    "concept_keywords": ["keyword1", "keyword2", ...]  # Key concepts to focus on
                 }}
                 
-                If no visual explanation is needed, set visual_explanation.type to "none" and content to null."""
+                If no visual explanation is needed, set visual_explanation.type to "none" and content to empty string."""
                 
                 try:
-                    explanation_response = await model.generate_content_async(explanation_prompt)
-                    if explanation_response and explanation_response.text:
-                        explanation_data = json.loads(explanation_response.text.strip())
-                        wrong_answer_explanations.append({
-                            "question": wrong["question"],
-                            "code_snippet": wrong.get("code_snippet"),
-                            "user_answer": wrong["user_answer"],
-                            "correct_answer": wrong["correct_answer"],
-                            "explanation": explanation_data["explanation"],
-                            "visual_explanation": explanation_data.get("visual_explanation", {"type": "none", "content": None})
-                        })
+                    response = await model.generate_content_async(explanation_prompt)
+                    if response and response.text:
+                        try:
+                            # Clean the response text
+                            clean_text = response.text.strip()
+                            if clean_text.startswith("```json"):
+                                clean_text = clean_text[7:]
+                            if clean_text.endswith("```"):
+                                clean_text = clean_text[:-3]
+                            clean_text = clean_text.strip()
+                            
+                            explanation = json.loads(clean_text)
+                            
+                            # Ensure all fields exist
+                            if "explanation" not in explanation:
+                                explanation["explanation"] = "No explanation provided."
+                            
+                            if "visual_explanation" not in explanation:
+                                explanation["visual_explanation"] = {"type": "none", "content": ""}
+                            elif "type" not in explanation["visual_explanation"]:
+                                explanation["visual_explanation"]["type"] = "none"
+                            elif "content" not in explanation["visual_explanation"]:
+                                explanation["visual_explanation"]["content"] = ""
+                            
+                            if "concept_keywords" not in explanation:
+                                explanation["concept_keywords"] = []
+                            
+                            # Add to explanations list
+                            wrong_answer_explanations.append(explanation)
+                            
+                            # Add keywords to set
+                            if explanation["concept_keywords"]:
+                                concept_keywords_set.update(explanation["concept_keywords"])
+                                
+                        except json.JSONDecodeError as e:
+                            logger.error(f"Failed to parse explanation JSON: {response.text}")
+                            logger.error(f"Error: {str(e)}")
+                            # Add a default explanation
+                            wrong_answer_explanations.append({
+                                "explanation": "Sorry, we couldn't generate an explanation for this question.",
+                                "visual_explanation": {"type": "none", "content": ""},
+                                "concept_keywords": []
+                            })
                 except Exception as e:
-                    logger.error(f"Error generating explanation for question: {str(e)}")
+                    logger.error(f"Error generating explanation: {str(e)}")
                     wrong_answer_explanations.append({
-                        "question": wrong["question"],
-                        "code_snippet": wrong.get("code_snippet"),
-                        "user_answer": wrong["user_answer"],
-                        "correct_answer": wrong["correct_answer"],
-                        "explanation": f"The correct answer is {wrong['correct_answer']}.",
-                        "visual_explanation": {"type": "none", "content": None}
+                        "explanation": "Sorry, we couldn't generate an explanation for this question.",
+                        "visual_explanation": {"type": "none", "content": ""},
+                        "concept_keywords": []
                     })
 
         # Generate general learning content
@@ -132,56 +167,65 @@ async def generate_learning_content(task_description: str, language: str, wrong_
         - If no code example is needed for a section, omit the 'code' field entirely
         - Make sure the JSON is properly formatted and valid"""
 
-        response = await model.generate_content_async(prompt)
-        
-        if not response or not response.text:
-            raise ValueError("No response from AI model")
-        
-        # Clean the response text to ensure it's valid JSON
-        response_text = response.text.strip()
-        # Remove any markdown code block indicators
-        response_text = response_text.replace('```json', '').replace('```', '')
-        # Remove any leading/trailing whitespace
-        response_text = response_text.strip()
-        
-        # Parse the JSON response
         try:
+            response = await model.generate_content_async(prompt)
+            
+            if not response or not response.text:
+                raise ValueError("No response from AI model")
+            
+            # Clean the response text to ensure it's valid JSON
+            response_text = response.text.strip()
+            # Remove any markdown code block indicators
+            response_text = response_text.replace('```json', '').replace('```', '')
+            # Remove any leading/trailing whitespace
+            response_text = response_text.strip()
+            
+            # Parse the JSON response
             content = json.loads(response_text)
+            
+            # Validate the structure
             if not isinstance(content, dict):
                 raise ValueError("Response is not a dictionary")
+            
             if "sections" not in content:
-                raise ValueError("Response missing 'sections' key")
-            if not isinstance(content["sections"], list):
-                raise ValueError("'sections' must be a list")
+                content["sections"] = []
             
             # Validate each section has the required fields
             for i, section in enumerate(content["sections"]):
-                if not all(key in section for key in ['title', 'content']):
-                    raise ValueError(f"Section {i+1} is missing required fields")
-                if not isinstance(section['title'], str) or not isinstance(section['content'], str):
-                    raise ValueError(f"Section {i+1} title and content must be strings")
+                if "title" not in section:
+                    section["title"] = f"Section {i+1}"
+                if "content" not in section:
+                    section["content"] = "No content provided."
                 
-                # Handle code field more flexibly
-                if 'code' in section:
-                    if section['code'] is None:
-                        # Remove None code fields
-                        del section['code']
-                    elif not isinstance(section['code'], str):
-                        # Convert non-string code to string
-                        section['code'] = str(section['code'])
+                # Convert all fields to strings
+                section["title"] = str(section["title"])
+                section["content"] = str(section["content"])
+                
+                if "code" in section:
+                    if section["code"] is None:
+                        del section["code"]
+                    else:
+                        section["code"] = str(section["code"])
             
             # Add wrong answer explanations if available
             if wrong_answer_explanations:
                 content["wrong_answers"] = wrong_answer_explanations
+                
+                # Add concept keywords
+                content["concept_keywords"] = list(concept_keywords_set)
+            else:
+                content["wrong_answers"] = []
+                content["concept_keywords"] = []
             
             # Add a flag to indicate that boilerplate code should be used
             content["use_boilerplate"] = True
             
+            logger.info("Successfully generated learning content")
             return content
+            
         except json.JSONDecodeError as e:
             logger.error(f"Error parsing learning content JSON: {str(e)}")
-            logger.error(f"Raw response: {response_text}")
-            raise ValueError("Failed to parse learning content: Invalid JSON format")
+            raise ValueError(f"Failed to parse learning content: Invalid JSON format - {str(e)}")
         except ValueError as e:
             logger.error(f"Error validating learning content format: {str(e)}")
             raise ValueError(f"Failed to parse learning content: {str(e)}")

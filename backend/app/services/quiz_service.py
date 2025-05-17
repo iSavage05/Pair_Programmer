@@ -125,33 +125,52 @@ async def generate_quiz(task_description: str, language: str) -> List[Dict[str, 
         logger.error(f"Error generating quiz: {str(e)}")
         raise Exception(f"Failed to generate quiz: {str(e)}")
 
-async def check_quiz_answers(task_description: str, language: str, answers: Dict[str, str]) -> Dict[str, Any]:
+async def check_quiz_answers(questions: List[Dict[str, Any]], answers: Dict[str, str]) -> Dict[str, Any]:
     """
-    Check the quiz answers and return the score and wrong answers.
+    Check the quiz answers against the provided questions.
+    
+    Args:
+        questions: List of question objects with correct answers
+        answers: Dictionary mapping question IDs to user answers
+        
+    Returns:
+        Dictionary with score and other evaluation data
     """
-    if not model:
-        try:
-            initialize_gemini()
-        except Exception as e:
-            raise Exception("Failed to initialize Gemini API. Please check your API key.")
-
     try:
-        # First, generate the quiz again to get the correct answers
-        questions = await generate_quiz(task_description, language)
+        # Create a map of question IDs to questions for easier lookup
+        question_map = {q["id"]: q for q in questions}
         
         # Check answers
         score = 0
         wrong_answers = []
+        correct_answers = []
+        question_results = []
         
-        for question in questions:
-            question_id = question["id"]
-            if question_id in answers:
-                user_answer = answers[question_id].strip()
-                correct_answer = question["correct_answer"].strip()
+        logger.info(f"Checking answers: {answers}")
+        logger.info(f"Available questions: {[q['id'] for q in questions]}")
+        
+        for question_id, user_answer in answers.items():
+            if question_id in question_map:
+                question = question_map[question_id]
+                correct_answer = question["correct_answer"]
                 
                 # Compare answers case-insensitively and ignoring extra whitespace
-                if user_answer.lower() == correct_answer.lower():
+                is_correct = user_answer.strip().lower() == correct_answer.strip().lower()
+                
+                # Add to question results
+                question_results.append({
+                    "id": question_id,
+                    "question": question["question"],
+                    "code_snippet": question.get("code_snippet", ""),
+                    "user_answer": user_answer,
+                    "correct_answer": correct_answer,
+                    "is_correct": is_correct
+                })
+                
+                if is_correct:
                     score += 1
+                    correct_answers.append(question_id)
+                    logger.info(f"Question {question_id} correct: '{user_answer}' matches '{correct_answer}'")
                 else:
                     wrong_answers.append({
                         "question": question["question"],
@@ -159,16 +178,21 @@ async def check_quiz_answers(task_description: str, language: str, answers: Dict
                         "user_answer": user_answer,
                         "correct_answer": correct_answer
                     })
+                    logger.info(f"Question {question_id} incorrect: '{user_answer}' doesn't match '{correct_answer}'")
+            else:
+                logger.warning(f"Question ID {question_id} not found in provided questions")
         
         # Validate that all questions were answered
         if len(answers) != len(questions):
-            raise ValueError("Not all questions were answered")
+            logger.warning(f"Not all questions were answered. Answers: {len(answers)}, Questions: {len(questions)}")
         
         return {
             "score": score,
             "total_questions": len(questions),
             "wrong_answers": wrong_answers,
-            "percentage": (score / len(questions)) * 100
+            "correct_answers": correct_answers,
+            "question_results": question_results,
+            "percentage": (score / len(questions)) * 100 if len(questions) > 0 else 0
         }
     
     except Exception as e:
